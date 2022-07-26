@@ -1,0 +1,327 @@
+#include<GL/glut.h>
+#include<iostream>
+#include<string.h>
+#include <string>
+//#include "RGBpixmap.h"
+#define max 100
+using namespace std;
+struct color {
+	int r, g, b;
+};
+int speed = 99993399;
+int p = 0;
+//int height=640,width=480;
+//RGBpixmap pix[6];
+//different line colors 
+color x[] = { {1,1,1},
+		 {1,0,0},
+		 {0,1,0},
+		 {1,0,1},
+		 {1,1,0},
+		 {0,1,1},
+		 {1,0,1} };
+//Properties of line len->length v->value c->color
+struct line {
+	int len, v;
+	color c;
+};
+
+//array of structure
+line sortln[max], ln[max];
+
+//N is no. of elements ,srtng used to play/pause sorting
+int N, srtng, flag = 0;
+
+
+//delay to control the sorting speed 
+void delay() {
+	int i = speed;
+	while (i--);
+}
+//function to print string on the screen
+void print(int x, int y, string str1, void* font)
+{
+	int length, k;
+	glRasterPos2f(x, y);
+	length = str1.length();
+	k = 0;
+	while (k < length) {
+		glutBitmapCharacter(font, str1[k]);
+		k++;
+	}
+
+}
+//function which contains text to print on display ,it calls print function
+void text_dis()
+{
+	glColor3f(1.0, 1.0, 1.0);//white
+	print(N + 30, 500, "**************************SORTING VISUALIZER*************************", GLUT_BITMAP_TIMES_ROMAN_24);
+	glColor3f(1.0, 1.0, 1.0);//Green color
+	print(5, 455, "****OPTIONS****", GLUT_BITMAP_9_BY_15);
+	print(5, 435, " a   - Auto-sort", GLUT_BITMAP_9_BY_15);
+	print(5, 415, " m   - Resume/Manual-sort", GLUT_BITMAP_9_BY_15);
+	print(5, 395, " r   - Reset", GLUT_BITMAP_9_BY_15);
+	print(5, 375, " p   - Pause", GLUT_BITMAP_9_BY_15);
+	print(5, 355, " Esc - Quit", GLUT_BITMAP_9_BY_15);
+}
+
+//Sorting function
+void insertionsort()
+{
+	line temp;
+	if (flag == 0) {
+		for (int j = 0;j < N - 1;j++)
+		{
+			if (sortln[j].v > sortln[j + 1].v)
+			{
+				temp = sortln[j];
+				sortln[j] = sortln[j + 1];
+				sortln[j + 1] = temp;
+				delay();
+				glutPostRedisplay();
+				delay();
+
+				break;
+			}
+		}
+	}
+	else {
+		for (int j = 0;j < N - 1;j++)
+		{
+			if (sortln[j].v < sortln[j + 1].v)
+			{
+				temp = sortln[j];
+				sortln[j] = sortln[j + 1];
+				sortln[j + 1] = temp;
+				delay();
+				glutPostRedisplay();
+				delay();
+
+				break;
+			}
+		}
+	}
+
+
+}
+// displaying main page  
+void mainpage()
+
+{
+	glColor3f(0.000, 0.749, 1.000);
+	print(30, 500, " VIDYAVARDHAKA COLLEGE OF ENGINEERING ", GLUT_BITMAP_TIMES_ROMAN_24);
+	print(40, 486, " autonomous institute affiliated to vtu, Belagavi ", GLUT_BITMAP_HELVETICA_12);
+	print(34, 470, " P.B. No.206, Gokulam III Stage, Mysuru - 570 002. ", GLUT_BITMAP_HELVETICA_18);
+
+	print(31, 400, " DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING ", GLUT_BITMAP_HELVETICA_18);
+	glColor3f(1, 1, 1);
+	print(43, 300, " SHELL SORT ", GLUT_BITMAP_TIMES_ROMAN_24);
+	glColor3f(0.000, 0.749, 1.000);
+	glColor3f(0, 1, 1);
+	print(65, 175, " By: ", GLUT_BITMAP_HELVETICA_18);
+	print(65, 150, " SKANDHAN M 		 - 4VV19CS157 ", GLUT_BITMAP_HELVETICA_18);
+	print(65, 120, " SREE ANUDEEP K      - 4VV19CS160  ", GLUT_BITMAP_HELVETICA_18);
+	print(65, 90, " SURYA MANOJ REDDY P  - 4VV19CS163  ", GLUT_BITMAP_HELVETICA_18);
+
+	print(5, 120, " Press space key to continue!!!  ", GLUT_BITMAP_TIMES_ROMAN_24);
+}
+
+void drawlines() {
+	int start = 50;
+	for (int i = 0;i < N;i++) {
+		glColor3f(sortln[i].c.r, sortln[i].c.g, sortln[i].c.b);
+		glBegin(GL_LINES);
+		glVertex2f(start, 40);
+		glVertex2f(start, 70 + sortln[i].len);
+		glEnd();
+		print(start - 2, 75 + sortln[i].len, to_string(sortln[i].v), GLUT_BITMAP_9_BY_15);
+		start += 10;
+	}
+}
+
+
+void display() {
+	glClear(GL_COLOR_BUFFER_BIT);
+	//pix[0].readBMPFile("hqdefault.bmp");
+
+	if (p == 0) {
+		glClearColor(0.108, 0.113, 0.196, 0);
+		mainpage();
+		glLoadIdentity();
+		glMatrixMode(GL_PROJECTION);
+		gluOrtho2D(0, 100, 0, 550);
+		//glPixelZoom(1,1);
+		//glRasterPos2i(0,0);
+		//pix[0].draw();
+
+	}
+
+	if (p == 1) {
+		glClearColor(0, 0, 0, 0);
+		glLoadIdentity();
+		glMatrixMode(GL_PROJECTION);
+		gluOrtho2D(0, N * 10 + 100, 0, 550);
+		text_dis();
+		glLineWidth(15);
+		drawlines();
+
+	}glutSwapBuffers();
+}
+
+void display1() {
+	glClear(GL_COLOR_BUFFER_BIT);
+	glClearColor(0, 0, 0, 0);
+	text_dis();
+	glLoadIdentity();
+	glMatrixMode(GL_PROJECTION);
+	gluOrtho2D(0, N * 10 + 100, 0, 550);
+	glLineWidth(15);
+	drawlines();
+	glutSwapBuffers();
+	if (srtng == 1)
+		insertionsort();
+	else
+		return;
+
+}
+
+void user_input(unsigned char button, int x, int y)
+{
+
+	switch (button)
+	{
+	case 1:
+	case 27: exit(0);
+	case 'a':srtng = 1;
+		glutDisplayFunc(display1);
+	case 'm':insertionsort();
+		break;
+	case 'p':srtng = 0;
+		break;
+	case 'r':
+		for (int i = 0;i < max;i++)
+			sortln[i] = ln[i];
+		display();
+		break;
+	case 32:
+		p = 1;
+		break;
+	}
+}
+
+void Input() {
+	int a, my_choice;
+
+
+	cout << "Enter number of elements:\n";
+	cin >> N;
+	cout << "Enter mode:" << endl;
+	cout << "1. Manual mode" << endl;
+	cout << "2. Auto mode" << endl;
+	cin >> my_choice;
+	if (my_choice == 2)
+	{
+		for (int i = 0;i < N;i++) {
+			sortln[i].v = (rand() % 100);
+			sortln[i].len = sortln[i].v * 2;
+			a = rand() % 7;
+			sortln[i].c = x[a];
+		}
+	}
+	if (my_choice == 1)
+	{
+		for (int i = 0;i < N;i++) {
+			cout << "Enter " << i + 1 << ": ";
+			cin >> sortln[i].v;
+
+			sortln[i].len = (sortln[i].v) * 7;
+			a = rand() % 7;
+			sortln[i].c = x[a];
+		}
+
+
+	}
+}
+void choice(int ch)
+{
+	switch (ch)
+	{
+
+	case 3: exit(0);
+	case 0:srtng = 1;
+		glutDisplayFunc(display1);
+		insertionsort();
+		break;
+	case 1:srtng = 0;
+		break;
+	case 2:
+		for (int i = 0;i < max;i++)
+			sortln[i] = ln[i];
+		display();
+		break;
+	}
+}
+
+
+void submenu(int ch)
+{
+	if (ch == 4)speed = 9999;
+	if (ch == 5)speed = 999999;
+	if (ch == 6)speed = 99999399;
+}
+
+void submenu1(int ch)
+{
+	switch (ch)
+	{
+	case 7:flag = 1;
+		break;
+
+	case 8:flag = 0;
+		break;
+	}
+
+}
+void mouseInterface()
+{
+	int sm = glutCreateMenu(submenu);
+	glutAddMenuEntry("  Slow  ", 6);
+	glutAddMenuEntry("  Medium ", 5);
+	glutAddMenuEntry("  Fast ", 4);
+	int sm1 = glutCreateMenu(submenu1);
+	glutAddMenuEntry("  Ascending ", 8);
+	glutAddMenuEntry("  Descending ", 7);
+	glutCreateMenu(choice);
+	glutAddMenuEntry("  Play  ", 0);
+	glutAddMenuEntry("  Pause ", 1);
+	glutAddMenuEntry("  Reset ", 2);
+	glutAddSubMenu(" Speed ", sm);
+	glutAddSubMenu(" Order ", sm1);
+	glutAddMenuEntry("  Exit  ", 3);
+
+	glutAttachMenu(GLUT_RIGHT_BUTTON);
+}
+
+void mouse(int btn, int state, int x, int y)
+{
+
+	if (btn == GLUT_LEFT_BUTTON && state == GLUT_DOWN)p = 1;
+
+}
+
+int main(int argc, char** argv) {
+	Input();
+	for (int i = 0;i < N;i++)
+		ln[i] = sortln[i];
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_DOUBLE);
+	glutInitWindowPosition(0, 0);
+	glutInitWindowSize(1400, 600);
+	glutCreateWindow("Sorting Visualizer");
+	glutKeyboardFunc(user_input);
+	mouseInterface();
+	glutDisplayFunc(display);
+	glutMouseFunc(mouse);
+	glutIdleFunc(display);
+	glutMainLoop();
+}
